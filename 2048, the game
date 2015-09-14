@@ -1,0 +1,104 @@
+/***************************************************
+ * Esta é uma versão do jogo 2048 programado em C. *
+ ***************************************************/
+#include <stdio.h>
+#include <stdlib.h>
+#include <conio2.h>
+#include <windows.h>
+#include "menu_2048.h" // Funções que definem as construções dos menus do jogo.
+#include "mecanica_2048.h" // Funções que definem as mecânicas de SAVE/LOAD e a própria lógica do jogo.
+#include "estrutura_2048.h" // Funções de construção estética.
+#include "controles_2048.h" // Funções de controle da movimentação dos números no tabuleiro.
+
+#define X_MENU 8 // Define a posição X do menu inicial.
+#define Y0_MENU 6 // Define a posição Y da primeira opção do menu inicial.
+#define X_OPCOES 28 // Define a posição X do menu de opções.
+#define Y0_OPCOES 6 // Define a posição Y da primeira opção do menu de opções.
+
+void main ()
+{
+    char *menu_inicial[5] = {"Novo jogo", "Carregar jogo", "Highscores", "Op\207\744es", "Sair"};
+    char *menu_opcoes[4] = {"Cor do tabuleiro", "Tamanho do tabuleiro", "Idioma", "Voltar"};
+    char opcao;
+    int x_tabuleiro, y_tabuleiro, tamanho_tabuleiro, cor_tabuleiro, idioma;
+
+    system ("mode con: lines=55 cols=80"); // Alteração do tamanho da tela para um padrão mais agradável e coerente com as opções do jogo.
+
+    // Inicialização mais explícita de algumas variáveis. Valores padrão, no caso do usuário não alterar nenhuma das configurações do jogo.
+    tamanho_tabuleiro = 4; // Tabuleiro 4x4
+    cor_tabuleiro = 7; // Cor padrão de texto (cinza).
+
+    // Printa o menu inicial.
+    print_menu_inicial (menu_inicial, X_MENU, Y0_MENU);
+
+    // Iteração de controle do menu inicial.
+    do
+    {
+        opcao = getch ();
+        switch (opcao)
+        {
+            case 72: // Tecla <SETA PARA CIMA>
+                {
+                    para_cima (X_MENU-1, Y0_MENU, Y0_MENU+4*2); // Controla a movimentação para cima no menu
+                }
+                break;
+            case 80: // Tecla <SETA PARA BAIXO>
+                {
+                    para_baixo (X_MENU-1, Y0_MENU, Y0_MENU+4*2); // Controla a movimentação para baixo no menu
+                }
+                break;
+            case 13: // Tecla <ENTER>
+                {
+                    switch (wherey()) // Switch irá verificar a posição da seta com a função wherey(), pois o cursor estará sempre junto à seta.
+                    {
+                        case Y0_MENU: // Primeira opção: novo Jogo.
+                            {
+                                // A função game chama toda a mecânica do jogo em si. O parâmetro 0 significa que é iniciado um novo jogo.
+                                game (cor_tabuleiro, tamanho_tabuleiro, 0);
+                                print_menu_inicial (menu_inicial, X_MENU, Y0_MENU); // Quando sair da função game, retorna ao menu inicial.
+                            }
+                            break;
+                        case (Y0_MENU+1*2): // Segunda opção: carregar jogo.
+                            {
+                                // A passagem do parâmetro 1 significa que o jogo será carregado a partir de um arquivo.
+                                game (cor_tabuleiro, tamanho_tabuleiro, 1);
+                                print_menu_inicial (menu_inicial, X_MENU, Y0_MENU); // Quando sair da função game, retorna ao menu inicial.
+                            }
+                            break;
+                        case (Y0_MENU+2*2): // Terceira opção: highscores.
+                            {
+                                print10mais (); // Função que imprime os 10 scores mais altos do arquivo highscores.bin.
+                                print_menu_inicial (menu_inicial, X_MENU, Y0_MENU); // Apertando qualquer tecla voltamos ao menu inicial.
+                            }
+                            break;
+                        case (Y0_MENU+3*2): // Quarta opção: opções.
+                            {
+                                print_menu_opcoes (menu_opcoes, X_OPCOES, Y0_OPCOES); // Imprime o menu de opções ao lado direito do inicial.
+                                selecao_opcoes (&cor_tabuleiro, &tamanho_tabuleiro, &idioma, X_OPCOES, Y0_OPCOES); // Controla a seleção dos itens do menu opções.
+                                print_menu_inicial (menu_inicial, X_MENU, Y0_MENU); // Quando sair do menu de opções, retorna ao menu inicial.
+                            }
+                            break;
+                        case (Y0_MENU+4*2): // Quinta opção: sair.
+                            {
+                                clrscr (); // Limpa a tela para finalizar o programa.
+                                return; // Sai do programa principal.
+                            }
+                            break;
+                    }
+                }
+                break;
+            case 27: // Tecla <ESC>
+                {
+                    clrscr();
+                    printf ("Pressione <ESC> novamente se deseja sair do jogo.\n\n"); // Confirmação
+                    printf ("Pressione outra tecla para voltar ao menu");
+                    opcao = getch();
+                    clrscr();
+                    if (opcao != 27)
+                        print_menu_inicial (menu_inicial, X_MENU, Y0_MENU); // Imprime o menu na tela novamente e volta para o loop.
+                }
+            default:;
+        }
+    } while (opcao != 27);
+    gotoxy (1, 30); // Desloca o cursor para a posição (1, 30) para que o texto de saída do programa apareça mais pra baixo.
+}
