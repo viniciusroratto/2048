@@ -1,0 +1,532 @@
+#ifndef ESTRUTURA_2048_H_INCLUDED
+#define ESTRUTURA_2048_H_INCLUDED
+
+
+// struct para ser usada com o arquivo highscores.bin.
+typedef struct highscore
+{
+    long int pontos; // Vai receber as maiores pontuações.
+    char nome[45]; // Recebe o nome dos jogadores do 2048 com as respectivas pontuações.
+
+} HIGHSCORE;
+
+
+// Cabeçalhos das funções.
+void zerar_matriz_int (int **M, int ordem);
+void num_aleatorio (int **M, int ordem);
+void dois_aleatorio (int **M, int ordem);
+void imprimir_numeros (int **M, int ordem, int x_inicial, int y_inicial);
+void imprimir_tabuleiro (int ordem, int x, int y);
+void imprimir_linhas (int espacos, int num_linha);
+void print_score (int ordem, long int score);
+int perdeu (int **M, int ordem);
+int potencia (int numero, int expoente);
+void print10mais ();
+void print_highscore_nojogo (int ordem);
+int compara_Score (int score);
+void ordena10mais (int score);
+void scoredecrescente (HIGHSCORE arranjo[]);
+
+
+// Zera uma matriz quadrada de uma ordem qualquer.
+void zerar_matriz_int (int **M, int ordem)
+{
+    int linha, coluna;
+    for (linha = 0; linha < ordem; linha++)
+        for (coluna = 0; coluna < ordem; coluna++)
+            *((int*)M + linha*ordem + coluna) = 0; // Atribuindo o valor 0 para cada elemento.
+}
+
+
+// Posicionar o dois ou o quatro em um local aleatório.
+void num_aleatorio (int **M, int ordem)
+{
+    int espaco_vazio, linha, coluna, sorteio;
+    espaco_vazio = 0; // A variável espaco_vazio nos diz se existe pelo menos uma posição disponível para colocar um dois ou um quatro.
+    while (!espaco_vazio)
+    {
+        espaco_vazio = 1;
+        linha = rand()%ordem;
+        coluna = rand()%ordem;
+        if ((*((int*)M + linha*ordem + coluna)) == 0) // Se na posição escolhida tivermos o número 0, podemos colocar o número em cima.
+        {
+            sorteio = rand()%10; // Definindo as probabilidades: 10% para o 4 e 90% para o 2
+            if (sorteio >= 1)
+                *((int*)M + linha*ordem + coluna) = 2;
+            else
+                *((int*)M + linha*ordem + coluna) = 4;
+            return 0; // Podemos sair da função após colocarmos o número na posição encontrada.
+        }
+        for (linha = 0; linha < ordem; linha++) // Busca pela matriz se ainda há alguma posição em que possa ser colocado o 2 ou 4.
+        {
+            for (coluna = 0; coluna < ordem; coluna++)
+            {
+                if ((*((int*)M + linha*ordem + coluna)) == 0)
+                    espaco_vazio = 0; // Caso exista uma posição possível, atribuímos o valor 0 novamento à espaco_vazio para reiniciar o ciclo e tentar achar essa posição.
+            }
+        }
+    }
+}
+
+
+// Posicionar o dois em um local aleatório.
+void dois_aleatorio (int **M, int ordem)
+{
+    int flag, linha, coluna;
+    flag = 0;
+    while (flag == 0)
+    {
+        flag = 1;
+        linha = rand()%ordem; // Pegamos uma linhas qualquer.
+        coluna = rand()%ordem; // Pegamos uma coluna qualquer.
+        if ((*((int*)M + linha*ordem + coluna)) == 0) // Se a posição tiver um 0, então ela recebe o 2.
+        {
+            *((int*)M + linha*ordem + coluna) = 2;
+            return;
+        }
+        for (linha = 0; linha < ordem; linha++) // Verifica se ainda há alguma posição na matriz que tem um 0.
+        {
+            for (coluna = 0; coluna < ordem; coluna++)
+            {
+                if ((*((int*)M + linha*ordem + coluna)) == 0)
+                    flag = 0;
+            }
+        }
+    }
+}
+
+
+// Imprime somente os números no tabuleiro do jogo.
+void imprimir_numeros (int **M, int ordem, int x_inicial, int y_inicial)
+{
+    int linha, coluna, cd_x, cd_y;
+    for (linha = 0, cd_y = y_inicial + 3; linha < ordem; linha++, cd_y += 6) // FOR com as coordenadas de posição em y.
+    {
+        for (coluna = 0, cd_x = x_inicial + 2; coluna < ordem; coluna++, cd_x += 8) // FOR com as coordenadas de posição em x.
+        {
+            gotoxy (cd_x, cd_y);
+            if ((*((int*)M + linha*ordem + coluna)) == 2)
+            {
+                textcolor(14);
+            }
+            else if ((*((int*)M + linha*ordem + coluna)) == 4)
+            {
+                textcolor(2);
+            }
+            else if ((*((int*)M + linha*ordem + coluna)) == 8)
+            {
+                textcolor(3);
+            }
+            else if ((*((int*)M + linha*ordem + coluna)) == 16)
+            {
+                textcolor(4);
+            }
+            else if ((*((int*)M + linha*ordem + coluna)) == 32)
+            {
+                textcolor(5);
+            }
+            else if ((*((int*)M + linha*ordem + coluna)) == 64)
+            {
+                textcolor(6);
+            }
+            else if ((*((int*)M + linha*ordem + coluna)) == 128) // Não utilizamos o textcolor(7) pois seria a cor padrão de texto e preferimos deixar para o resto dos textos.
+            {
+                textcolor(8);
+            }
+            else if ((*((int*)M + linha*ordem + coluna)) == 256)
+            {
+                textcolor(9);
+            }
+            else if ((*((int*)M + linha*ordem + coluna)) == 512)
+            {
+                textcolor(10);
+            }
+            else if ((*((int*)M + linha*ordem + coluna)) == 1024)
+            {
+                textcolor(11);
+            }
+            else if ((*((int*)M + linha*ordem + coluna)) == 2048)
+            {
+                textcolor(12);
+            }
+            else if ((*((int*)M + linha*ordem + coluna)) == 4096)
+            {
+                textcolor(13);
+            }
+            else if ((*((int*)M + linha*ordem + coluna)) == 8192)
+            {
+                textcolor(14);
+            }
+            else if ((*((int*)M + linha*ordem + coluna)) == 16384)
+            {
+                textcolor(15);
+            }
+            else if ((*((int*)M + linha*ordem + coluna)) == 32768)
+            {
+                textcolor(26);
+            }
+            else if ((*((int*)M + linha*ordem + coluna)) == 65536)
+            {
+                textcolor(27);
+            }
+            else if ((*((int*)M + linha*ordem + coluna)) == 131072)
+            {
+                textcolor(28);
+            }
+            else if ((*((int*)M + linha*ordem + coluna)) == 262144)
+            {
+                textcolor(29);
+            }
+            else if ((*((int*)M + linha*ordem + coluna)) == 524288)
+            {
+                textcolor(30);
+            }
+            else if ((*((int*)M + linha*ordem + coluna)) == 0) // Recebe é printado na cor de fundo do programa.
+            {
+                textcolor(0);
+            }
+            printf ("%6d", *((int*)M + linha*ordem + coluna)); // Todo número é impresso com 6 espaços para dígitos.
+        }
+    }
+}
+
+
+// Imprime o tabuleiro.
+void imprimir_tabuleiro (int ordem, int x, int y) // Imprime o caractere | juntamente com as linhas do tabuleiro.
+{
+    int contador, i, linha, formato_coluna = 186, tamanho;
+    linha = 1;
+    gotoxy (x, y);
+    imprimir_linhas(ordem, linha); // Chama a primeira linha.
+    y++;
+    for (i = 0; i < ordem; i++)
+    {
+        gotoxy (x, y);
+        for (tamanho = 0; tamanho < 6; tamanho++, y++) // Número de espaços verticais nos quadrados
+        {
+            for (contador = 0; contador <= ordem; contador++) // Criação dos espaços onde irão os números.
+            {
+                printf ("%c       ", formato_coluna);
+            }
+            gotoxy (x, y);
+        }
+        linha += 2; // linha tracejada + linha com os espaços para os número.
+        imprimir_linhas(ordem, linha); // Imprime a linha abaixo dos últimos espaços criados.
+    }
+}
+
+
+// Função ligada com a função imprimir tabuleiro - Imprime as linhas do tabuleiro
+void imprimir_linhas (int espacos, int num_linha) // Imprime as linhas tracejadas que dividem os espaços para os números.
+{
+    int contador, cantos, cruzamento, formato_linha = 205; // A variavel num_linha só serve para dizer em que linha estaremos imprimindo os caracteres naquele momento.
+    cruzamento = 206;
+    if (num_linha == 1)
+    {
+        cantos = 201;
+        printf ("%c", cantos); // Canto superior esquerdo.
+    }
+    else if (num_linha != (espacos*2 + 1))
+        {
+            cantos = 204;
+            printf ("%c", cantos); // Lado esquerdo da tabela.
+        }
+        else
+        {
+            cantos = 200;
+            printf ("%c", cantos); // Canto inferior esquerdo.
+        }
+    // Exemplo: "| | |" aqui temos 2 espaços para números, porém são necessários 5 caracteres para formar uma linha acima ou abaixo disso.
+    for (contador = 0; contador < ((espacos*8)-1); contador++) // Imprime o número de caracteres suficientes para completar os espaços.
+    {
+        if (num_linha != 1 && num_linha != (espacos*2)+1) // Aqui começa a confusão.
+        {
+            if (contador%8 == 7) // Aqui é onde a linha se cruza com a coluna.
+                printf ("%c", cruzamento);
+            else // Aqui não ocorre cruzamento.
+                printf ("%c", formato_linha);
+        }
+        else if (num_linha == 1) // É onde as colunas tocam a primeira linha.
+            {
+                if (contador%8 == 7)
+                {
+                    cruzamento = 203;
+                    printf ("%c", cruzamento);
+                }
+                else
+                    printf ("%c", formato_linha);
+            }
+            else
+            {
+                if (contador%8 == 7) // É onde as colunas tocam a última linha.
+                {
+                    cruzamento = 202;
+                    printf ("%c", cruzamento);
+                }
+                else
+                    printf ("%c", formato_linha);
+            }
+    }
+    if (num_linha == 1) // Canto superior direito.
+    {
+        cantos = 187;
+        printf ("%c", cantos);
+    }
+    else if (num_linha != (espacos*2 + 1)) // Lado direito da tabela.
+    {
+        cantos = 185;
+        printf ("%c", cantos);
+    }
+    else // Canto inferior direito.
+    {
+        cantos = 188;
+        printf ("%c", cantos);
+    }
+}
+
+
+// Função recebe um inteiro e imprime abaixo do tabuleiro.
+void print_score (int ordem, long int score)
+{
+    textcolor(7);
+    gotoxy(40 - 4*ordem, (18-2*ordem) + 6*ordem + 1); // (18+2*ordem) é o ponto inicial do tabuleiro, (+6*ordem) é quanto o tabuleiro cresce em cada ordem.
+    printf("Score:");
+    gotoxy(40 - 4*ordem, (18-2*ordem) + 6*ordem + 2);
+    printf(" %8ld ", score);
+}
+
+
+// Função que procura a situação de derrota do jogador.
+// Nessa função, são verificados todos os números do tabuleiro procurando em volta deles se há alguma opção de movimentação.
+int perdeu (int **M, int ordem)
+{
+    int linha, coluna;
+
+    for (linha = 0; linha < ordem; linha++) // Busca pela matriz se ainda há alguma posição em que possa ser colocado o 2 ou 4.
+    {
+        for (coluna = 0; coluna < ordem; coluna++)
+        {
+            if (*((int*)M + linha*ordem + coluna) == 0)
+                return 0;
+        }
+    }
+    for (linha = 0; linha < ordem; linha++)
+    {
+        for (coluna = 0; coluna < ordem; coluna++)
+        {
+            if (linha == 0)
+            {
+                if (coluna == 0)
+                {
+                    if ((*((int*)M + linha*ordem + coluna) == *((int*)M + linha*ordem + coluna+1)) || (*((int*)M + linha*ordem + coluna) == *((int*)M + (linha+1)*ordem + coluna)))
+                        return 0;
+                }
+                else if (coluna == ordem-1)
+                {
+                    if ((*((int*)M + linha*ordem + coluna) == *((int*)M + linha*ordem + coluna-1)) || (*((int*)M + linha*ordem + coluna) == *((int*)M + (linha+1)*ordem + coluna)))
+                        return 0;
+                }
+                else
+                {
+                    if ((*((int*)M + linha*ordem + coluna) == *((int*)M + (linha+1)*ordem + coluna)) || (*((int*)M + linha*ordem + coluna) == *((int*)M + linha*ordem + coluna-1)) || (*((int*)M + linha*ordem + coluna) == *((int*)M + linha*ordem + coluna+1)))
+                        return 0;
+                }
+            }
+            else if (coluna == 0)
+            {
+                if (linha == ordem-1)
+                {
+                    if ((*((int*)M + linha*ordem + coluna) == *((int*)M + linha*ordem + coluna+1)) || (*((int*)M + linha*ordem + coluna) == *((int*)M + (linha-1)*ordem + coluna)))
+                        return 0;
+                }
+                else
+                {
+                    if ((*((int*)M + linha*ordem + coluna) == *((int*)M + linha*ordem + coluna+1)) || (*((int*)M + linha*ordem + coluna) == *((int*)M + (linha-1)*ordem + coluna)) || (*((int*)M + linha*ordem + coluna) == *((int*)M + (linha+1)*ordem + coluna)))
+                        return 0;
+
+                }
+            }
+            else if (linha == ordem-1)
+            {
+                if (coluna == ordem-1)
+                {
+                    if ((*((int*)M + linha*ordem + coluna) == *((int*)M + (linha-1)*ordem + coluna)) || (*((int*)M + linha*ordem + coluna) == *((int*)M + linha*ordem + coluna-1)))
+                        return 0;
+                }
+                else
+                {
+                    if ((*((int*)M + linha*ordem + coluna) == *((int*)M + linha*ordem + coluna-1)) || (*((int*)M + linha*ordem + coluna) == *((int*)M + linha*ordem + coluna+1)) || (*((int*)M + linha*ordem + coluna) == *((int*)M + (linha-1)*ordem + coluna)))
+                        return 0;
+                }
+            }
+            else if (coluna == ordem-1)
+            {
+                if ((*((int*)M + linha*ordem + coluna) == *((int*)M + linha*ordem + coluna-1)) || (*((int*)M + linha*ordem + coluna) == *((int*)M + (linha-1)*ordem + coluna)) || (*((int*)M + linha*ordem + coluna) == *((int*)M + (linha+1)*ordem + coluna)))
+                    return 0;
+            }
+            else
+            {
+                if ((*((int*)M + linha*ordem + coluna) == *((int*)M + linha*ordem + coluna-1)) || (*((int*)M + linha*ordem + coluna) == *((int*)M + linha*ordem + coluna+1)) || (*((int*)M + linha*ordem + coluna) == *((int*)M + (linha-1)*ordem + coluna)) || (*((int*)M + linha*ordem + coluna) == *((int*)M + (linha+1)*ordem + coluna)))
+                    return 0;
+            }
+        }
+    }
+    return 1; // No caso de não haver mais possibilidades de movimentação no jogo.
+}
+
+
+// Função que calcula a potenciação. A função power estava apresentando alguns problemas, então foi feita uma implementação dela aqui.
+int potencia (int numero, int expoente)
+{
+    int potencia = 1, contador;
+    for (contador = 0; contador < expoente; contador++)
+        potencia *= numero;
+    return potencia;
+}
+
+
+// Função que imprime os 10 primeiros valores do arquivo.
+// Em um espaço definido por um GOTOXY.
+void print10mais ()
+{
+    FILE *high;
+    HIGHSCORE temporario;
+    int contador = 0;
+    clrscr();
+    if (!(high = fopen ("highscores.bin", "r+b")))
+        printf ("\nFalha ao abrir arquivo.\n");
+    while (fread (&temporario, sizeof(HIGHSCORE), 1, high))
+    {
+        gotoxy (1, 10 + contador);
+        printf ("%2d. %s", contador+1, temporario.nome);
+        while (wherex()!=45) // Para deixar com um padrão estético mais agradável.
+            printf (".");
+        printf ("%ld\n", temporario.pontos);
+        contador += 1;
+    }
+    printf ("\n\n");
+    getch();
+    clrscr();
+    fclose(high);
+}
+
+
+// Função se assemelha àquela que printa o score atual no jogo.
+// A diferença é que ela busca a pontuação mais alta no arquivo HIGHSCORES e imprime no jogo.
+void print_highscore_nojogo (int ordem)
+{
+    FILE *high;
+    HIGHSCORE pontuacao;
+
+    high = fopen("highscores.bin", "rb"); // Abre o arquivo para leitura.
+
+    if(!(high))// testa se o arquivo funciona.
+        printf("Erro na leitura do arquivo.");
+
+    textcolor(7); // Cor padrão de texto, "cinza",
+    gotoxy(60 - 4*ordem, (18-2*ordem) + 6*ordem + 1); // (18+2*ordem) é o ponto inicial do tabuleiro, (+6*ordem) é quanto o tabuleiro cresce em cada ordem.
+    printf("Highscores:");
+    gotoxy(60 - 4*ordem, (18-2*ordem) + 6*ordem + 2);
+    fread(&pontuacao, sizeof(HIGHSCORE), 1, high);
+    printf(" %8ld ", pontuacao.pontos);
+    fclose(high);
+}
+
+
+// Após o final  do jogo a função compara pontuação do jogador com as do arquivo.
+// Usar em condicional em conjunto com a função ORDENA10MAIS.
+// IF compara_score 1, SCORE é MAIOR, toda ORDENA10MAIS.
+// IF compara_score 0. SCORE é MENOR, ignora.
+int compara_Score (int score)
+{
+    FILE *high; // cria o arquivo.
+
+    HIGHSCORE pontuacao; // cria a struct.
+
+    high = fopen("highscores.bin", "rb"); // Abertura de binário somente para leitura.
+
+    if(!(fopen("highscores.bin", "rb"))) // Teste de erro.
+    {
+        printf("Erro na leitura do arquivo.");
+        return 0;
+        fclose(high);
+    }
+
+    else
+    {
+        while(fread(&pontuacao, sizeof(HIGHSCORE), 1, high)) //se o arquivo abrir, testa a pontuação contra cada highscore.
+        {
+            if(score > pontuacao.pontos) // se o SCORE for maior do que algum highscore, autoriza a próxima função a ser executada.
+            {
+                fclose(high);
+                return 1;
+            }
+        }
+    fclose(high);
+    return 0;
+    }
+}
+
+
+// Função invoca pontuações mais altas e armazena em uma string de strucs, pede nome do jogador e reorganiza arranjo.
+// Depois, limpa o arquivo e grava na nova ordem.
+void ordena10mais (int score)
+{
+    int counter = 0;
+    int i;
+
+    FILE *high;
+    HIGHSCORE arranjo[11];   // O arranjo contém espaço para dez highscores atuais e o novo.
+
+    for (i = 0; i < 10; i++) // Caso o arquivo não tenha os 11 espaços ocupados, a iteração se certifica que as pontuações não serão comparadas com lixo.
+        arranjo[i].pontos = 0;
+
+    high = fopen("highscores.bin", "rb"); // Abre o arquivo para leitura.
+
+    if(!(fopen("highscores.bin", "rb")))           // Teste.
+        printf("\nErro na leitura do arquivo.\n");
+    while(fread(&arranjo[counter], sizeof(HIGHSCORE), 1, high)) // Iteração armazena structs em um arranjo de structs.
+        counter++;
+
+    fclose(high); // Fecha o arquivo.
+
+    arranjo[counter].pontos = score; // Inclui SCORE no último espaço livre de PONTOS.
+    printf("\nDigite seu nome: ");
+    fflush(stdin);
+    gets(arranjo[counter].nome);  // O último espaço livre de NOME recebe uma string com o nome do novo campeão.
+
+    scoredecrescente(arranjo); // Função ordena o arranjo em ordem decrescente (maior no topo).
+
+    high = fopen("highscores.bin", "wb"); // Abre e zera o arquivo de recordes.
+
+    for (i = 0; i < 10; i++) // Iteração grava os 10 recordes, já organizadpos, deixando o menor de fora.
+        fwrite(&arranjo[i], sizeof(HIGHSCORE), 1, high);
+    fclose(high); // fecha o arquivo.
+}
+
+
+// Função recebe arranjo de structs e os ordena conforme a pontuação.
+void scoredecrescente (HIGHSCORE arranjo[])
+{
+    int i=0, j=0; // Índices.
+    int indmaior;
+    HIGHSCORE aux; // struct auxiliar;
+
+    for (i = 0; i <= 10; i++) // Iteração que ordena structs. Comparando o INDMAIOR com o J.
+    {                       // Toda vez que o J for maior que o INDMAIOR IND maior recebe J e faz um SWAP com I.
+        indmaior = i;
+        for (j = i+1; j <= 10; j++)
+        {
+            if(arranjo[j].pontos > arranjo[indmaior].pontos)
+            {
+                indmaior = j;
+                aux = arranjo[i];
+                arranjo[i] = arranjo[indmaior];
+                arranjo[indmaior] = aux;
+            }
+        }
+    }
+}
+
+
+#endif // ESTRUTURA_2048_H_INCLUDED
