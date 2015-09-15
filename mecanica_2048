@@ -1,0 +1,313 @@
+#ifndef MECANICA_2048_H_INCLUDED
+#define MECANICA_2048_H_INCLUDED
+
+// Cabeçalhos.
+void game (int cor, int tamanho, int load);
+int vitoria (int ordem, int vez, int score);
+int continuar ();
+void salvajogo (int** M, int score, int ordem);
+int loadjogo (int **M, int *ordem, int* score);
+
+// Toda a mecânica de jogo em alto nível
+void game (int cor, int tamanho, int load)
+{
+    int matriz[tamanho][tamanho], vez = 0, x_tab, y_tab, perde, movimento, soma;
+    char tecla_de_controle = 0, salvar;
+    long int score = 0;
+    x_tab = 40 - 4*tamanho; // Posicionando o tabuleiro na tela em função do tamanho dele.
+    y_tab = 18 - 2*tamanho;
+    clrscr();
+    srand(time(NULL));
+
+    if (load == 0) // No caso de ter sido selecionada a opção de "Novo jogo" no menu.
+        {
+            zerar_matriz_int(matriz, tamanho, tamanho);
+            dois_aleatorio (matriz, tamanho);
+            dois_aleatorio (matriz, tamanho);
+        }
+    else // No caso de ter sido selecionada a opção de "Carregar jogo" no menu.
+        {
+            load = loadjogo(matriz, &tamanho, &score);
+            clrscr();
+            if (load == 0)
+                return;
+        }
+
+    // Imprime o tabuleiro com os números
+    textcolor(cor); // Define a cor de tabuleiro para a cor escolhida no menu.
+    imprimir_tabuleiro (tamanho, x_tab, y_tab); // Imprime tabuleiro.
+    imprimir_numeros (matriz, tamanho, x_tab, y_tab); // Imprime os números no tabuleiro.
+    print_score (tamanho, score); // Imprime o score atual.
+    print_highscore_nojogo (tamanho); // Imprime o score mais alto obtido.
+
+    // Elaboração dos movimentos dos números
+    while (tecla_de_controle != 27)
+    {
+        gotoxy (1, y_tab + tamanho*6 + 1);
+        tecla_de_controle = getch();
+        movimento = 0;
+
+        switch (tecla_de_controle)
+        {
+        case 75: // Esquerda
+            {
+                // Mecânica de locomoção dos números para a esquerda.
+                movimento = controle_esquerda (matriz, tamanho, &score, &soma);
+                if (movimento == 1) // Caso ocorra movimentação de números, um número aleatório aparecerá.
+                {
+                    // Posicionando outro dois em um local aleatório.
+                    num_aleatorio (matriz, tamanho);
+                }
+            }
+            break;
+        case 77: // Direita
+            {
+                // Mecânica de locomoção dos números para a direita.
+                movimento = controle_direita (matriz, tamanho, &score, &soma);
+                if (movimento == 1) // Caso ocorra movimentação de números, um número aleatório aparecerá.
+                {
+                    // Posicionando outro dois em um local aleatório.
+                    num_aleatorio (matriz, tamanho);
+                }
+            }
+            break;
+        case 72: // Cima
+            {
+                // Mecânica de locomoção dos números para cima.
+                movimento = controle_cima (matriz, tamanho, &score, &soma);
+                if (movimento == 1) // Caso ocorra movimentação de números, um número aleatório aparecerá.
+                {
+                    // Posicionando outro dois em um local aleatório.
+                    num_aleatorio (matriz, tamanho);
+                }
+            }
+            break;
+        case 80: // Baixo
+            {
+                // Mecânica de locomoção dos números para baixo.
+                movimento = controle_baixo (matriz, tamanho, &score, &soma);
+                if (movimento == 1) // Caso ocorra movimentação de números, um número aleatório aparecerá.
+                {
+                    // Posicionando outro dois em um local aleatório.
+                    num_aleatorio (matriz, tamanho);
+                }
+            }
+            break;
+        case 27:
+            {
+                clrscr();
+                textcolor(7);
+                printf ("Deseja salvar o jogo? (s-sim) (n-n\706o)");
+                do
+                {
+                    salvar = getch(); // Seleção da opção de salvar ou não.
+                    switch (salvar)
+                    {
+                    case 's':
+                            salvajogo (matriz, score, tamanho);
+                            return;
+                        break;
+                    case 'n':
+                            clrscr();
+                            return;
+                        break;
+                    default:;
+                    }
+                } while ((salvar != 'n') || (salvar != 's'));
+            }
+            break;
+        case 'l': // L para LOAD GAME.
+            {
+                clrscr();
+                game (cor, tamanho, 1);
+                clrscr();
+                return;
+            }
+            break;
+        case 'r': // R para RESET GAME.
+            {
+                zerar_matriz_int(matriz, tamanho, tamanho);
+                dois_aleatorio (matriz, tamanho);
+                dois_aleatorio (matriz, tamanho);
+                score = 0;
+            }
+            break;
+        default:;
+        }
+        // Imprimir a matriz de novo, por cima dos números antigos.
+        imprimir_numeros (matriz, tamanho, x_tab, y_tab);
+        print_score (tamanho, score);
+        perde = perdeu (matriz, tamanho);
+        if (perde == 1)
+        {
+            gotoxy (x_tab, y_tab-1);
+            printf ("Parece que voc\210 perdeu...");
+            Sleep (3000);
+            getch();
+            clrscr();
+            printf ("\nVoc\210 perdeu o jogo! Sua pontua\207\706o foi de %d pontos.\n", score); // Momento para salvar o jogo.
+            if (compara_Score (score))
+                ordena10mais (score);
+            else
+                printf ("Sua pontua\207\706o n\706o foi suficiente para entrar nos highscores.");
+            getch();
+            clrscr();
+            return;
+        }
+        if (soma == potencia (2, 2*tamanho+3+vez)) // Verifica se o número do objetivo foi atingido.
+        {
+            vitoria (tamanho, vez, score);
+            printf ("Deseja continuar jogando? (s-SIM) (n-N\707O)");
+            if (continuar ()) // Verifica se o jogador quer continuar a jogar.
+            {
+                clrscr();
+                // Imprime o tabuleiro com os números
+                textcolor(cor);
+                imprimir_tabuleiro (tamanho, x_tab, y_tab);
+                imprimir_numeros (matriz, tamanho, x_tab, y_tab);
+                print_score (tamanho, score);
+                vez++;
+            }
+            else // Momento para salvar o jogo.
+            {
+                clrscr();
+                if (compara_Score (score)) // Pede nome e salva o score no arquivo se for suficiente para entrar nos highscores.
+                    ordena10mais (score);
+                else
+                    printf ("Sua pontua\207\706o n\706o foi suficiente para entrar nos highscores.");
+                clrscr();
+                return;
+            }
+        }
+    soma = 0;
+    }
+}
+
+// Função que é chamada quando o jogo é vencido.
+int vitoria (int ordem, int vez, int score)
+{
+    gotoxy (25 - 4*ordem, 17 - 2*ordem);
+    printf ("Parab\202ns, voc\210 conseguiu formar o n\243mero %d", potencia (2, 2*ordem+3+vez));
+    getch();
+    clrscr();
+    gotoxy(15, 5);
+    textcolor (7);
+    printf ("Parab\202ns, voc\210 ganhou o jogo!! Sua pontua\207\706o: %d", score);
+    gotoxy(15, 6);
+}
+
+// Função que avisa ao programa principal (função game) se o jogo deve continuar ou não.
+int continuar ()
+{
+    char continuar;
+    do
+    {
+        continuar = getch(); // O jogador decide entre s-sim e n-não.
+        if (continuar == 's')
+            return 1;
+        else if (continuar == 'n')
+            return 0;
+        else
+        {
+            gotoxy(15, 7);
+            printf ("\nPor favor, aperte 'S' ou 'N'.");
+        }
+    } while (continuar != 's' && continuar != 'n');
+}
+
+//recebe matriz e printa conte?do no arquivo.
+void salvajogo (int** M, int score, int ordem)
+{
+    int i = 0, j = 0;
+    char nome_arq[30], opcao;
+    FILE* save;
+    FILE* read;
+
+    if (read = fopen("gamestatus.txt", "r")) // Verifica se o arquivo gamestatus.txt já existe.
+    {
+        printf ("\nO arquivo gamestatus.txt j\240 existe. \nDeseja substituir? (s-sim) (n-n\706o)");
+        opcao = getch ();
+        switch (opcao)
+        {
+        case 's': // Substituir o arquivo.
+                strcpy (nome_arq, "gamestatus");
+            break;
+        case 'n': // Criar um novo save.
+                printf ("\nAVISO: digitando um nome de um save que j\240 existe ir\240 substituir o antigo.");
+                printf ("\nDigite o nome do novo arquivo de save: ");
+                fflush(stdin);
+                gets(nome_arq);
+            break;
+        default:;
+        }
+    }
+    else // Caso o arquivo ainda não exista, ele será criado.
+        strcpy (nome_arq, "gamestatus");
+    fclose(read);
+
+    strcat (nome_arq, ".txt");
+    save = fopen(nome_arq, "w"); // A função apaga o arquivo anterior e cria um novo save em cima.
+    if (!save) // teste tradicional para ver se o arquivo abriu.
+        printf("Erro na abertura do arquivo");
+
+    fprintf(save, "%d \n", ordem); // Função fprintf joga os inteiros no arquivo txt.
+
+    for(i = 0; i < ordem; i++) // Iteração joga a matriz inteira de jogo, separando os elementos por vírgula.
+        for (j = 0; j < ordem; j++)
+        {
+            fprintf(save, "%d", *((int*)M + i*ordem + j)); // Depois de cada elemento, uma vírgula.
+            fprintf(save, ",");
+        }
+    fprintf(save, "\n"); // Termina a linha da matriz.
+    fprintf(save, "%d \n", score); // Últimas informações a serem colocadas no TXT.
+    clrscr();
+    gotoxy(1, 1);
+    fclose(save);
+    printf ("Jogo foi salvo."); // Avisa que o jogo foi salvo.
+    Sleep (1000);
+    clrscr();
+}
+
+// fun??o carrega jogo salvo
+int loadjogo (int **M, int *ordem, int* score)
+{
+    int i = 0, j = 0;
+    char str1[50], str2[120], str3[50];
+    char nomedosave[25];
+    FILE* save;
+    textcolor(7);
+    printf ("Lista de arquivos de save:\n");
+    system("dir /b *.txt"); // Lista os arquivos de save na pasta do jogo.
+
+    printf("\nDigite o nome do arquivo que deseja carregar: ");
+    fflush(stdin);
+    gets(nomedosave);
+
+    strcat(nomedosave, ".txt");
+    save = fopen(nomedosave, "r"); // A função apaga o arquivo anterior e cria um novo save em cima.
+
+    if (!save) // teste tradicional para ver se o arquivo abriu.
+    {
+        printf("Erro na abertura do arquivo");
+        Sleep(1000);
+        clrscr();
+        return 0;
+    }
+
+    fgets(&str1, sizeof(str1), save); // captura a primeira string do arquivo e salva na string.
+    fgets(&str2, sizeof(str2), save); // captura a segunda string ....
+    fgets(&str3, sizeof(str3), save); // capt...
+
+    fclose(save); // fecha o arquivo.
+
+    *ordem = atoi(str1); // transforma string em inteiro antes de passar por refer?ncia.
+    *score = atoi(str3);//  Mesma coisa, com outra string.
+
+    *((int*)M + i* *ordem + j) = atoi(strtok(str2, ","));
+
+    for(i=0; i < *ordem; i++)
+        for(j=0; j < *ordem; j++)
+            *((int*)M + i* (*ordem) + j + 1) = atoi(strtok(NULL, ","));
+}
+
+#endif // MECANICA_2048_H_INCLUDED
