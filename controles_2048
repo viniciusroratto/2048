@@ -1,0 +1,167 @@
+#ifndef CONTROLES_2048_H_INCLUDED
+#define CONTROLES_2048_H_INCLUDED
+
+// Cabeçalhos das funções.
+int controle_esquerda (int **M, int ordem, int *score, int *soma);
+int controle_direita (int **M, int ordem, int *score, int *soma);
+int controle_cima (int **M, int ordem, int *score, int *soma);
+int controle_baixo (int **M, int ordem, int *score, int *soma);
+
+// No caso de apertar a seta esquerda.
+int controle_esquerda (int **M, int ordem, int *score, int *soma)
+{
+    int linha, coluna, flag, coluna_suporte, movimento = 0; // A variável movimento nos diz se houve movimentação de algum número.
+    for (linha = 0; linha < ordem; linha++)
+    {
+        flag = 0; // A variável flag será utilizada para impedir a soma em cadeias dos números.
+        for (coluna = 1; coluna < ordem; coluna++) // A coluna começa no 1, pois se fosse 0 não teria como ir para a esquerda.
+        {
+            if (*((int*)M + linha*ordem + coluna) != 0) // Verificando se o número naquela posição é diferente de 0 para ver se há possibilidade de movimentação.
+            {
+                coluna_suporte = coluna; // coluna_suporte é usada para que a variável coluna não seja alterada dentro do loop.
+                for (coluna_suporte; coluna_suporte > flag; coluna_suporte--) // Fazendo o transporte do número até a posição que ele puder andar, sendo no máximo até coluna = 0.
+                {
+                    if (*((int*)M + linha*ordem + coluna_suporte-1) == 0) // Se o número adjacente é 0, há o deslocamento.
+                    {
+                        *((int*)M + linha*ordem + coluna_suporte-1) = *((int*)M + linha*ordem + coluna_suporte);
+                        *((int*)M + linha*ordem + coluna_suporte) = 0;
+                        movimento = 1;
+                    }
+                    else if (*((int*)M + linha*ordem + coluna_suporte-1) == *((int*)M + linha*ordem + coluna_suporte)) // Se o número adjacente é igual, ocorre a soma.
+                    {
+                        *((int*)M + linha*ordem + coluna_suporte-1) = (*((int*)M + linha*ordem + coluna_suporte-1))*2;
+                        *((int*)M + linha*ordem + coluna_suporte) = 0;
+                        *score += *((int*)M + linha*ordem + coluna_suporte-1);
+                        *soma = *((int*)M + linha*ordem + coluna_suporte-1);
+                        movimento = 1;
+                        flag = coluna_suporte; // flag recebe a última posição em que a soma foi realizada, dessa forma, não é possível realizar uma soma neste mesmo local novamente.
+                    }
+                }
+            }
+        }
+    }
+    if (movimento == 1)
+        return 1;
+    else
+        return 0;
+}
+
+// No caso de apertar a seta direita.
+int controle_direita (int **M, int ordem, int *score, int *soma)
+{
+    int linha, coluna, flag, coluna_suporte, movimento = 0;
+    for (linha = 0; linha < ordem; linha++)
+    {
+        flag = (ordem - 1); // A variável flag será utilizada para impedir a soma em cadeias dos números.
+        for (coluna = (ordem-2); coluna >= 0; coluna--)
+
+        {
+            if (*((int*)M + linha*ordem + coluna) != 0)
+            {
+                coluna_suporte = coluna; // coluna_suporte é usada para que a variável coluna não seja alterada dentro do loop.
+                for (coluna_suporte; coluna_suporte < flag; coluna_suporte++) // Fazendo o transporte do número até a posição que ele puder andar, sendo no máximo até coluna = 0
+                {
+                    if (*((int*)M + linha*ordem + coluna_suporte+1) == 0) // Se o número adjacente é 0, há o deslocamento.
+                    {
+                        *((int*)M + linha*ordem + coluna_suporte+1) = *((int*)M + linha*ordem + coluna_suporte);
+                        *((int*)M + linha*ordem + coluna_suporte) = 0;
+                        movimento = 1;
+                    }
+                    else if (*((int*)M + linha*ordem + coluna_suporte+1) == *((int*)M + linha*ordem + coluna_suporte)) // Se o número adjacente é igual, ocorre a soma.
+                    {
+                        *((int*)M + linha*ordem + coluna_suporte+1) = (*((int*)M + linha*ordem + coluna_suporte+1))*2;
+                        *((int*)M + linha*ordem + coluna_suporte) = 0;
+                        *score += *((int*)M + linha*ordem + coluna_suporte+1);
+                        *soma = *((int*)M + linha*ordem + coluna_suporte+1);
+                        movimento = 1;
+                        flag = coluna_suporte; // flag recebe a última posição em que a soma foi realizada, dessa forma, não é possível realizar uma soma neste mesmo local novamente.
+                    }
+                }
+            }
+        }
+    }
+    if (movimento == 1)
+        return 1;
+    else
+        return 0;
+}
+
+// No caso de apertar a seta para cima.
+int controle_cima (int **M, int ordem, int *score, int *soma)
+{
+    int linha, coluna, linha_suporte, flag, movimento = 0;
+    for (coluna = 0; coluna < ordem; coluna++)
+    {
+        flag = 0; // A variável flag será utilizada para impedir a soma em cadeias dos números.
+        for (linha = 1; linha < ordem; linha++) // A linha começa no 1, pois se fosse 0 não faria sentido ir para a cima.
+        {
+            if (*((int*)M + linha*ordem + coluna) != 0)
+            {
+                linha_suporte = linha; // linha_suporte é usada para que a variável coluna não seja alterada dentro do loop.
+                for (linha_suporte; linha_suporte > flag; linha_suporte--) // Fazendo o transporte do número até a posição que ele puder andar, sendo no máximo até coluna = 0
+                {
+                    if (*((int*)M + (linha_suporte-1)*ordem + coluna) == 0) // Se o número adjacente é 0, há o deslocamento.
+                    {
+                        *((int*)M + (linha_suporte-1)*ordem + coluna) = *((int*)M + linha_suporte*ordem + coluna);
+                        *((int*)M + linha_suporte*ordem + coluna) = 0;
+                        movimento = 1;
+                    }
+                    else if (*((int*)M + (linha_suporte-1)*ordem + coluna) == *((int*)M + linha_suporte*ordem + coluna)) // Se o número adjacente é igual, ocorre a soma.
+                    {
+                        *((int*)M + (linha_suporte-1)*ordem + coluna) = *((int*)M + (linha_suporte-1)*ordem + coluna)*2;
+                        *((int*)M + linha_suporte*ordem + coluna) = 0;
+                        *score += *((int*)M + (linha_suporte-1)*ordem + coluna);
+                        *soma = *((int*)M + (linha_suporte-1)*ordem + coluna);
+                        movimento = 1;
+                        flag = linha_suporte; // flag recebe a última posição em que a soma foi realizada, dessa forma, não é possível realizar uma soma neste mesmo local novamente.
+                    }
+                }
+            }
+        }
+    }
+    if (movimento == 1)
+        return 1;
+    else
+        return 0;
+}
+
+// No caso de apertar a seta para baixo.
+int controle_baixo (int **M, int ordem, int *score, int *soma)
+{
+    int linha, coluna, flag, linha_suporte, movimento = 0;
+    for (coluna = 0; coluna < ordem; coluna++)
+    {
+        flag = (ordem - 1); // A variável flag será utilizada para impedir a soma em cadeias dos números.
+        for (linha = (ordem-2); linha >= 0; linha--) // Agora a verificação de cada linha deve ser feita da direita para a esquerda.
+        {                                               // A coluna começa em ordem-2, pois se fosse ordem estaria na última coluna da matriz, e não faria sentido querer ir para a direita.
+            if (*((int*)M + linha*ordem + coluna) != 0)
+            {
+                linha_suporte = linha; // linha_suporte é usada para que a variável coluna não seja alterada dentro do loop.
+                for (linha_suporte; linha_suporte < flag; linha_suporte++) // Fazendo o transporte do número até a posição que ele puder andar, sendo no máximo até coluna = ORDEM-1
+                {
+                    if (*((int*)M + (linha_suporte+1)*ordem + coluna) == 0) // Se o número adjacente é 0, há o deslocamento.
+                    {
+                        *((int*)M + (linha_suporte+1)*ordem + coluna) = *((int*)M + linha_suporte*ordem + coluna);
+                        *((int*)M + linha_suporte*ordem + coluna) = 0;
+                        movimento = 1;
+                    }
+                    else if (*((int*)M + (linha_suporte+1)*ordem + coluna) == *((int*)M + linha_suporte*ordem + coluna)) // Se o número adjacente é igual, ocorre a soma.
+                    {
+                        *((int*)M + (linha_suporte+1)*ordem + coluna) = *((int*)M + (linha_suporte+1)*ordem + coluna)*2;
+                        *((int*)M + linha_suporte*ordem + coluna) = 0;
+                        *score += *((int*)M + (linha_suporte+1)*ordem + coluna);
+                        *soma = *((int*)M + (linha_suporte+1)*ordem + coluna);
+                        movimento = 1;
+                        flag = linha_suporte; // flag recebe a última posição em que a soma foi realizada, dessa forma, não é possível realizar uma soma neste mesmo local novamente.
+                    }
+                }
+            }
+        }
+    }
+    if (movimento == 1)
+        return 1;
+    else
+        return 0;
+}
+
+#endif // CONTROLES_2048_H_INCLUDED
